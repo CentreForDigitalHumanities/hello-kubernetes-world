@@ -10,7 +10,7 @@ Basic HTML and GIT knowledge is required.
 - Unzip and move the contents on the new repository folder
 - Open `index.html` in a browser to view it, edit as you will
 - Create a git commit and push it to the remote repository
-- Activate GitHub Pages for this repository and build from the `main` branch
+- Activate GitHub Pages for the repository and build from the `main` branch
 
 ### References
 - https://revealjs.com/installation/#basic-setup

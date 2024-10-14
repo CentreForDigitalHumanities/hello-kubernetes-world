@@ -1,6 +1,6 @@
 # hello-kubernetes-world
 Presentation and relevant material.  
-Visit on https://gdamaskos.github.io/hello-kubernetes-world/
+Visit on https://centrefordigitalhumanities.github.io/hello-kubernetes-world/
 
 ## How to get this frontend site up and running
 Basic HTML and Git knowledge is required.

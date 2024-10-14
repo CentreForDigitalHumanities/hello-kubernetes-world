@@ -5,7 +5,7 @@ Visit on https://centrefordigitalhumanities.github.io/hello-kubernetes-world/
 ## How to get a presentation site up and running
 Basic HTML and GIT knowledge is required.
 - Create a new repository on GitHub
-- Clone it on locally
+- Clone it locally
 - Download the latest `reveal.js` version https://github.com/hakimel/reveal.js/archive/master.zip
 - Unzip and move the contents on the new repository folder
 - Open `index.html` in a browser to view it, edit as you will

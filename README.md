@@ -2,7 +2,7 @@
 Presentation and relevant material.  
 Visit on https://centrefordigitalhumanities.github.io/hello-kubernetes-world/
 
-## How to get a presentation site up and running
+## How to get a presentation website up and running
 Basic HTML and GIT knowledge is required.
 - Create a new repository on GitHub
 - Clone it locally

@@ -80,9 +80,13 @@ Please read the comments in the `kustomization.yaml` files to get a better under
 Side-note: the source manifests are not as extensively commented as the plain manifests example. This is because the author ran out of time. If you're interested in a more detailed explanation, please let me know!
 
 #### Usage
+Firstly, you need to update some values in the kustomize files to your environment. The values you need to update are enclosed in `<>` brackets. However, feel free to change other values as well to see what happens!
 
 To deploy the app using kustomize, you just use this simple command:
 ```
+# Deploy the app using the production variant
+kubectl apply -k overlay/production -n <your namespace>
+# Deploy the app using the test variant
 kubectl apply -k overlay/test -n <your namespace>
 ```
 

@@ -133,8 +133,8 @@
 						<h2>Data Plane</h2>
 						<font size="5">
 							<p>
-								<strong>kubelet:</strong> agent ensures that containers are running, reports to the apiserver
-								<br><strong>kube-proxy:</strong> facilitates networking between pods and handles external traffic
+								<strong>kubelet:</strong> agent ensures that containers are running, reports to the kube-apiserver
+								<br><strong>kube-proxy:</strong> facilitates networking between <span style="color: aqua;">pods</span> and handles external traffic
 								<br><strong>container runtime:</strong> (ie. Docker) pulls and runs container images from a registry
 							</p>
 							<p style="text-align: center;">
@@ -180,7 +180,8 @@
 						minikube dashboard
 						docker ps # 🤯
 						minikube config set memory 4096
-						kubectl get # watch kubectl get all
+						kubectl config
+						watch kubectl get all
 					</code></pre>
 					an important file: ~/.kube/config
 					<br><br>
@@ -191,15 +192,15 @@
 				<section>
 					<section>
 						<h2>Examples</h2>
-						<pre><code style="color: greenyellow;" data-trim data-noescape>
-							kubectl apply -f hello-k8s-message.yaml # or through dashboard
-							kubectl apply -f kubesnake.yaml # or through dashboard
-							minikube ip # or minikube service <name> --url
-							minikube delete # 💥
-						</code></pre>
-						<font size="4">example1: <a href="./kubernetes-examples/hello-k8s-message/hello-k8s-message.yaml">hello-k8s-message.yaml</a></font>
-						| <font size="4">example2: <a href="./kubernetes-examples/kubesnake/kubesnake.yaml">kubesnake.yaml</a></font>
-						<br><br><br>
+                        <pre><code style="color: greenyellow;" data-trim data-noescape>
+                            kubectl apply -f hello-k8s-message.yaml # or through dashboard
+                            kubectl apply -f kubesnake.yaml # or through dashboard
+                            minikube ip # or minikube service <name> --url
+                            minikube stop/delete # 💥
+                        </code></pre>
+                        <font size="4">example1: <a href="./kubernetes-examples/hello-k8s-message/hello-k8s-message.yaml">hello-k8s-message.yaml</a></font>
+                        | <font size="4">example2: <a href="./kubernetes-examples/kubesnake/kubesnake.yaml">kubesnake.yaml</a></font>
+                        <br>.<br>.<br>
 						Bonus: Development IdP
 					</section>
 					<section>

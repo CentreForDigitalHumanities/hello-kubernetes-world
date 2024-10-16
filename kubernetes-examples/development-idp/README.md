@@ -2,6 +2,15 @@
 
 This example shows how to deploy the [development IdP](https://github.com/CentreForDigitalHumanities/Development-IdP) on Kubernetes.
 
+## About the development IdP
+
+The development IdP is a simple Django app that acts as an Identity Provider (IdP) for SAML and OpenID Connect (OIDC). 
+It is meant to be used for (local) development and testing purposes. Previously, it was only available as a 'regular'
+python app, but now it has been dockerized and can be deployed on Kubernetes.
+
+To view the changes made, see [this compare view](https://github.com/CentreForDigitalHumanities/Development-IdP/compare/8ad63a6c8611e51818055b91d69a821a2e9a3290..17dcd2d1e46fa707a70517e8b2faa20794cf1f54)
+
+
 ## Caveats
 
 The development IdP is a very simple app that is specifically designed to be run as a single container (with an embedded database or external database). 
@@ -75,4 +84,27 @@ Side-note: the source manifests are not as extensively commented as the plain ma
 To deploy the app using kustomize, you just use this simple command:
 ```
 kubectl apply -k overlay/test -n <your namespace>
+```
+
+## Loading initial data
+
+Once the app is running, you should load the initial data. To do this, we first need to get a shell into the running pod.
+
+First, figure out the name of the pod:
+```
+kubectl get pods -n <your namespace>
+```
+
+The pod name will be something like `django-idp-<random string>-<random string>`.
+
+Then, get a shell into the pod:
+```
+kubectl exec --stdin --tty <pod name> -n <your namespace> -- /bin/sh
+```
+
+Once you're in the pod, run the following command to load the initial data:
+```
+python manage.py loaddata main/fixtures/initial.json
+python manage.py loaddata main/fixtures/admin-user.json
+python manage.py loaddata main/fixtures/surfconext-test-users.json
 ```

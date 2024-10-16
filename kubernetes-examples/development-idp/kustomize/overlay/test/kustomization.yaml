@@ -24,6 +24,13 @@ configMapGenerator:
     # The hostname of the Django application, as used in the ingress path above
     - DJANGO_HOST='<HOSTNAME>'
     - DJANGO_ALLOWED_HOSTS='<HOSTNAME>,localhost'
+    # Put the app in debug mode
+    - DJANGO_DEBUG=true
+    - DJANGO_DEBUG_TOOLBAR=true
+    - DJANGO_IDP_DESCRIPTION='Test Identity Provider'
+    - LOG_LEVEL=DEBUG
+    - DJANGO_LOG_LEVEL=DEBUG
+    - SAML_LOG_LEVEL=DEBUG
     # Our postgres container service is named `didp-postgres-service`. On most k8s clusters, this will result
     # in a DNS name of `didp-postgres-service.NAMESPACE.svc.cluster.local`
     - POSTGRES_HOST='didp-postgres-service.<NAMESPACE>.svc.cluster.local'

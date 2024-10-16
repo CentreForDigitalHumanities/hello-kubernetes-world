@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: django-idp-ingress
+  labels:
+    app.kubernetes.io/instance: django-idp
+    app.kubernetes.io/name: django-idp
+spec:
+  rules:
+    - host: idp.example.org
+      http:
+        paths:
+          - backend:
+              service:
+                name: idp-service
+                port:
+                  name: http
+            path: /
+            pathType: Prefix

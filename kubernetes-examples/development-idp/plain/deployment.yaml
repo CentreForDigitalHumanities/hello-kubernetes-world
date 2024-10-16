@@ -1,0 +1,103 @@
+# This is _deployment_ configuration for the Django IDP application.
+# The deployment is a Kubernetes resource that describes the desired state for a set of pods.
+# In this case, we want a single pod with a single container running the Django IDP application.
+#
+# It is important to understand that the deployment is a _desired state_, from which Kubernetes will create the actual
+# resources (pods) and ensure that they are running as specified in the deployment.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Labels can be used to select objects and to find collections of objects that satisfy certain conditions
+  # In this case, we are using labels to identify the deployment as part of the django-idp application
+  labels:
+    app.kubernetes.io/instance: django-idp
+    app.kubernetes.io/name: django-idp
+  # This will be the name of our pod
+  name: django-idp
+spec:
+  # Remember that comment about a deployment being a desired state? Good!
+  # This 'selector' controls which pods this deployment will manage.
+  # In this case, we select pods with two labels. Any other pod will be ignored by this deployment.
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: django-idp
+      app.kubernetes.io/name: django-idp
+  # The template section describes the pods that will be created by this deployment. (In other words, this is a pod template.)
+  template:
+    # The metadata section of the pod template
+    metadata:
+      # Above we specified that this deployment will manage pods with two labels. Here, we add those labels to the pod template.
+      # If we don't do this, the deployment will create the pod, but not realize it also has to manage it after it's created.
+      labels:
+        app.kubernetes.io/instance: django-idp
+        app.kubernetes.io/name: django-idp
+    # Here we define the actual pod spec; this is loosely comparable to a Docker-compose file
+    spec:
+      # First, we define our 'volumes'. These are directories that are mounted into the container.
+      # This is comparable to the 'volumes' top-level section in a Docker-compose file.
+      volumes:
+        # First, we define a volume that will contain the certificates for the Django IDP application.
+        - name: django-certs
+          # This is a 'secret' volume, which means that the data in this volume is stored in a Kubernetes secret.
+          # All keys in the secret will be mounted as files in the container. (In this case, the private key and public cert.)
+          secret:
+            # Here we specify the name of the secret that contains the certificates.
+            secretName: django-certs
+
+        # Next, we define a volume that will be used to store the cache-files
+        - name: cache-volume
+          # As a cache volume is not expected to persist between pod restarts, we use an emptyDir volume.
+          # This means kubernetes will an empty 'volume' the pod can write to, but it will be deleted when the pod is deleted/restarted.
+          emptyDir:
+            # We specify a size limit for the cache volume. This is the maximum size the volume can grow to.
+            sizeLimit: 500Mi
+
+        # As we deploy using a sqlite database, we need to store the database file somewhere.
+        - name: database-volume
+          # As we want the database to persist between pod restarts, we use a persistent volume claim.
+          # See also 'persistent-volume-claim.yaml'
+          persistentVolumeClaim:
+            # This is the name of the persistent volume claim that will be used to store the database file. This must match the name in the PVC.
+            claimName: django-pvc
+
+      # Now we define the containers that will run in the pod.
+      # This is comparable to the 'services' section in a Docker-compose file.
+      containers:
+      - name: idp # First up, the name of the pod; this will be used to identify the pod in logs and other places.
+        # We specify the image that will be used to create the container.
+        image: ghcr.io/centrefordigitalhumanities/development-idp/development-idp:v2.0.1
+
+        # Next, we define the ports that the container will expose.
+        # This port is later used to create a service that will allow other pods to communicate with this pod.
+        # This port must be the port the container expects. You can 'remap' this port in the service definition.
+        # See 'service.yaml' for more information.
+        ports:
+          # Our pod expects to receive HTTP traffic on port 7000.
+          - containerPort: 7000
+            name: http
+            protocol: TCP
+
+        # Now to mount the volumes we defined above
+        volumeMounts:
+          # We mount the certificates volume to the /certs directory in the container.
+          # If we change this, one must also change the paths in the Django configuration. (See 'config-map.yaml')
+          - mountPath: "/certs"
+            name: django-certs
+            # Always mount volumes coming from secrets (or config maps) as read-only. They cannot be written to.
+            readOnly: true
+          # We mount the cache volume to the /cache directory in the container.
+          - mountPath: /cache
+            name: cache-volume
+          # We mount the database volume to the /data directory in the container.
+          # If we change this, one must also change the paths in the Django configuration. (See 'config-map.yaml')
+          - mountPath: /data
+            name: database-volume
+
+        # Lastly, we configure the environment variables that will be set in the container.
+        envFrom:
+          # First, we load environment variables from a config map. See 'config-map.yaml' for more information.
+          - configMapRef:
+              name: django-config-map
+          # Our config map doesn't contain 'sensitive' files, so we also load environment variables from a secret.
+          - secretRef:
+              name: django-secrets

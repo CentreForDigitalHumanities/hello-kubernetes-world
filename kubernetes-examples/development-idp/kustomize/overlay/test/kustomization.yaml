@@ -1,0 +1,61 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Load in the resources from the base directories
+resources:
+- ../../base/psql
+- ../../base/django
+
+# This 'patches' the ingress object to replace the host with the actual hostname
+patches:
+  - target:
+      kind: Ingress
+      name: django-idp-ingress
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: <HOSTNAME>
+
+
+# This 'patches' the values inside `django/config-map.yaml` with overrides for this environment
+configMapGenerator:
+- name: django-config-map
+  behavior: merge
+  literals:
+    # The hostname of the Django application, as used in the ingress path above
+    - DJANGO_HOST='<HOSTNAME>'
+    - DJANGO_ALLOWED_HOSTS='<HOSTNAME>,localhost'
+    # Our postgres container service is named `didp-postgres-service`. On most k8s clusters, this will result
+    # in a DNS name of `didp-postgres-service.NAMESPACE.svc.cluster.local`
+    - POSTGRES_HOST='didp-postgres-service.<NAMESPACE>.svc.cluster.local'
+    # The database name and user for the Django application. The password is stored in a secret
+    - POSTGRES_DB=idp_test
+    - POSTGRES_USER=idp_test
+    # This demo does not have HTTPS configured, so we set this to false
+    - DJANGO_HTTPS='false'
+
+# Our base files don't have any secrets defined, so these are not 'patches' but actual generators
+secretGenerator:
+# The secret used by the psql container.
+- name: postgres-secrets
+  # Literals mean that the secret is generated from these key-value pairs
+  # Note: unlike actual k8s secrets, these are not base64 encoded
+  literals:
+    - POSTGRES_DB=idp_test
+    - POSTGRES_USER=idp_test
+    - POSTGRES_PASSWORD=super_secret_password
+# The secrets used by django
+- name: django-secrets
+  literals:
+  - DJANGO_SECRET_KEY=super_secret_string
+  - POSTGRES_PASSWORD=super_secret_password
+# The certificates used for SAML/OIDC
+- name: django-certs
+  # Files mean that the secret is generated from these files, using the filename as the key
+  files:
+  - private.key
+  - public.cert
+
+# This overrides the tag of the image used in `django/deployment.yaml` to use a different tag in this environment
+images:
+- name: ghcr.io/centrefordigitalhumanities/development-idp/development-idp
+  newTag: v2.0.1-alpha.1 # Note: this tag does not actually exist, it's just an example

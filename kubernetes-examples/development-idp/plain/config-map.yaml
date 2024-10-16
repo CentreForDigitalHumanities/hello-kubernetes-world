@@ -1,0 +1,24 @@
+# The pod will use this 'config map' to get the environment variables it needs to run the Django application.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # This name is used to reference the config map in the deployment.yaml file
+  name: django-config-map
+  # Labels can be used to select objects and to find collections of objects that satisfy certain conditions
+  # In this case, we are using labels to identify the config map as part of the django-idp application
+  labels:
+    app.kubernetes.io/instance: django-idp
+    app.kubernetes.io/name: django-idp
+# The data section actually contains the environment variables that the Django application will use.
+data:
+  DJANGO_DEBUG: 'false'
+  DJANGO_DEBUG_TOOLBAR: 'false'
+  DJANGO_HOSTED: 'true'
+  DJANGO_HOST: "idp.example.org" # Change this to the domain you get from the ingress
+  DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1" # Add DJANGO_HOST here
+  DJANGO_DB_TYPE: "sqlite"
+  DJANGO_SQLLITE_FILE: "/data/db.sqlite3"
+  DJANGO_HTTPS: "false"
+  
+  DJANGO_IDP_PRIVATE_KEY: "/certs/private.key"
+  DJANGO_IDP_PUBLIC_CERT: "/certs/public.cert"

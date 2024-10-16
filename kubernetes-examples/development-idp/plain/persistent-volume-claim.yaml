@@ -1,0 +1,33 @@
+# This is a Persistent Volume Claim (PVC) for the Django IDP application.
+# A PVC is a way to 'request' storage from the cluster. It is NOT a volume itself, the cluster will create a volume for you based on the PVC.
+# However, you're unlikely to ever interact with the volume directly, as you it's best practice to refer to the PVC in your deployments.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: django-pvc
+  # Labels can be used to select objects and to find collections of objects that satisfy certain conditions
+  # In this case, we are using labels to identify the PVC as part of the django-idp application
+  labels:
+    app.kubernetes.io/instance: django-idp
+    app.kubernetes.io/name: django-idp
+spec:
+  # The access mode of the volume. This can be 'ReadWriteOnce', 'ReadOnlyMany', or 'ReadWriteMany'.
+  # See below for an explanation of the different access modes.
+  accessModes:
+    # We chose 'ReadWriteOnce' as it's the most-supported access mode.
+    - ReadWriteOnce
+  # Here we request 5Gi of storage.
+  # The cluster can decide otherwise, but most of the time it will honor this request.
+  resources:
+    requests:
+      storage: 5Gi
+
+# About access modes:
+# A k8s cluster consists of multiple _nodes_ (servers). Each node can run multiple _pods_ (containers). THis is important to know before we continue.
+# - ReadWriteOnce: The volume can be mounted as read-write by a single node. This means all pods running on the single node that has it mounted can use this volume.
+# - ReadOnlyMany: The volume can be mounted as read-only by many nodes. This means all pods running on all nodes can read from this volume, but not write to it.
+# - ReadWriteMany: The volume can be mounted as read-write by many nodes. This means all pods running on all nodes can read from and write to this volume.
+# - ReadWriteOncePod: The volume will always only be mounted by a single pod. Other pods, even if they are on the same node, will not be able to mount this volume.
+#
+# If you're only ever going to run a single pod that needs to write to the volume, 'ReadWriteOnce' is the best choice, as it's the most supported access mode.
+# The ITS Openshift cluster also supports 'ReadWriteMany', but if you're testing on Minikube or another cluster, it might not support this access mode. So be careful!

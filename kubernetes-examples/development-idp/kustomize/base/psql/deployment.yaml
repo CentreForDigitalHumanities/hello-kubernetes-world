@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: didp-postgresql
+  labels:
+    app.kubernetes.io/instance: didp-postgresql
+    app.kubernetes.io/name: didp-postgresql
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: didp-postgresql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: didp-postgresql
+    spec:
+      containers:
+        - name: postgres
+          image: 'bitnami/postgresql:14' # Official image does not like being rootless
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: postgres-secrets
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgresdata
+      volumes:
+        - name: postgresdata
+          persistentVolumeClaim:
+            claimName: didp-postgres-pvc
+
+
+

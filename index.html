@@ -189,17 +189,135 @@
 					| <font size="4">k9s: <a href="https://k9scli.io/">https://k9scli.io/</a></font>
 				</section>
 				<section>
-					<h2>Examples</h2>
-					<pre><code style="color: greenyellow;" data-trim data-noescape>
-						kubectl apply -f hello-k8s-message.yaml # or through dashboard
-						kubectl apply -f kubesnake.yaml # or through dashboard
-						minikube ip # or minikube service <name> --url
-						minikube delete # 💥
-					</code></pre>
-					<font size="4">example1: <a href="./kubernetes-examples/hello-k8s-message/hello-k8s-message.yaml">hello-k8s-message.yaml</a></font>
-					| <font size="4">example2: <a href="./kubernetes-examples/kubesnake/kubesnake.yaml">kubesnake.yaml</a></font>
-					<br>.<br>.<br>
-					Bonus
+					<section>
+						<h2>Examples</h2>
+						<pre><code style="color: greenyellow;" data-trim data-noescape>
+							kubectl apply -f hello-k8s-message.yaml # or through dashboard
+							kubectl apply -f kubesnake.yaml # or through dashboard
+							minikube ip # or minikube service <name> --url
+							minikube delete # 💥
+						</code></pre>
+						<font size="4">example1: <a href="./kubernetes-examples/hello-k8s-message/hello-k8s-message.yaml">hello-k8s-message.yaml</a></font>
+						| <font size="4">example2: <a href="./kubernetes-examples/kubesnake/kubesnake.yaml">kubesnake.yaml</a></font>
+						<br><br><br>
+						Bonus: Development IdP
+					</section>
+					<section>
+						<h2>Development IdP</h2>
+						<font size="4">
+						<ul>
+							<li style="margin-bottom: 10px">A django app for developing & testing applications using SAML/OIDC</li>
+							<li style="margin-bottom: 10px">Meant for local Docker deployment, easily adapted to run in Kubertenes</li>
+							<li style="margin-bottom: 10px">For today: configuring docker apps, the K8S way</li>
+							<li style="margin-bottom: 10px">For at home: deploying using manifests & kustomize: see <a href="./kubernetes-examples/development-idp/README.md">example readme</a></li>
+						</ul>
+						</font>
+					</section>
+					<section>
+						<h2>In Docker compose</h2>
+						<div style="display: flex; gap: 1rem;">
+						<pre><code style="color: greenyellow;" data-trim data-noescape>
+							.
+							├── container.env
+							├── docker-compose.yml
+							├── private.key
+							└── public.cert
+						</code></pre>
+
+						<pre><code style="color: greenyellow;" data-trim data-noescape>
+							services:
+							  dev-idp:
+								  # [..]
+								  env_file:
+								    - ./container.env
+								  secrets:
+								    - private_key
+								    - public_cert
+
+							secrets:
+							  private_key:
+								  file: ./private.key
+							  public_cert:
+								  file: ./public.cert
+						</code></pre>
+						</div>
+					</section>
+					<section>
+						<h2>In Kubernetes</h2>
+						<font size="4">
+							<strong>The problem</strong><br/>
+							<span>We have no filesystem to retrieve these values and files from 🙁️</span><br/>
+							<strong>The solution</strong><br/>
+							<span>Use Kubernetes config maps and secrets</span><br/>
+
+						</font>
+					</section>
+					<section>
+						<h2>Env variables</h2>
+						<pre><code style="color: greenyellow;" data-trim data-noescape>
+						apiVersion: v1
+						kind: Secret
+						metadata:
+						  name: django-secrets
+						type: Opaque
+						data:
+						  DJANGO_SECRET_KEY: dG9wc3lfa3JldHMK
+						</code></pre>
+						<pre><code style="color: greenyellow;" data-trim data-noescape>
+						apiVersion: v1
+						kind: ConfigMap
+						metadata:
+						  name: django-config-map
+						data:
+						  DJANGO_HOST: "idp.example.org" # Change this to the domain you get from the ingress
+						  DJANGO_DB_TYPE: "sqlite"
+						  DJANGO_SQLLITE_FILE: "/data/db.sqlite3"
+						  # [..]
+						</code></pre>
+					</section>
+					<section>
+						<h2>Env variables</h2>
+						<pre><code style="color: greenyellow;" data-trim data-noescape>
+						# deployment.yaml
+						  containers:
+							- name: dev-idp
+							  envFrom:
+							  - configMapRef:
+								  name: django-config-map
+							  - secretRef:
+								  name: django-secrets
+						</code></pre>
+					</section>
+					<section>
+						<h2>File secrets</h2>
+						<pre><code style="color: greenyellow;" data-trim data-noescape>
+						apiVersion: v1
+						kind: Secret
+						metadata:
+						  name: django-certs
+						type: Opaque
+						data:
+						  private.key: [base64 encoded private key]
+						  public.cert: [base64 encoded public cert]
+						</code></pre>
+					</section>
+					<section>
+						<h2>File secrets</h2>
+						<pre><code style="color: greenyellow;" data-trim data-noescape>
+						# deployment.yaml
+						# [..]
+						volumes:
+						  - name: django-certs
+						    secret:
+						      secretName: django-certs
+						# [..]
+						containers:
+						  - name: dev-idp
+						    volumeMounts:
+						      - name: django-certs
+						        mountPath: /certs
+						</code></pre>
+					</section>
 				</section>
 				<section>
 					<h2>Next steps</h2>

@@ -7,7 +7,7 @@ Basic HTML and GIT knowledge is required.
 - Create a new repository on GitHub
 - Clone it locally
 - Download the latest `reveal.js` version https://github.com/hakimel/reveal.js/archive/master.zip
-- Unzip and move the contents on the new repository folder
+- Unzip and move the contents in the new repository folder
 - Open `index.html` in a browser to view it, edit as you will
 - Create a git commit and push it to the remote repository
 - Activate GitHub Pages for the repository and build from the `main` branch

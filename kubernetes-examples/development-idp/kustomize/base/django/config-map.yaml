@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: django-config-map
+  labels:
+    app.kubernetes.io/instance: django-idp
+    app.kubernetes.io/name: django-idp
+data:
+  DJANGO_DEBUG: 'false'
+  DJANGO_DEBUG_TOOLBAR: 'false'
+  DJANGO_HOSTED: 'true'
+  DJANGO_HOST: "devidp-testproject.apps-crc.testing"
+  DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,devidp-testproject.apps-crc.testing"
+  DJANGO_DB_TYPE: "postgres"
+  POSTGRES_DB: "idp"
+  POSTGRES_USER: "idp"
+  POSTGRES_HOST: "didp-postgres-service.testproject.svc.cluster.local"
+  DJANGO_SQLLITE_FILE: "/cache/db.sqlite3" # TODO
+  DJANGO_HTTPS: "true"
+  
+  DJANGO_IDP_PRIVATE_KEY: "/certs/private.key"
+  DJANGO_IDP_PUBLIC_CERT: "/certs/public.cert"

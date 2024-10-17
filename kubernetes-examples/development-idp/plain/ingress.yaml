@@ -1,0 +1,39 @@
+# Ingress configuration for the Django IDP service
+# An ingress is a way to route HTTP and HTTPS traffic to the services in the cluster.
+# If you're coming from deploying docker containers on a single server, this is roughly the equivalent of the
+# reverse proxy server (apache/nginx) that backoffice configures for you
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: django-idp-ingress
+  # Labels can be used to select objects and to find collections of objects that satisfy certain conditions
+  # In this case, we are using labels to identify the ingress as part of the django-idp application
+  labels:
+    app.kubernetes.io/instance: django-idp
+    app.kubernetes.io/name: django-idp
+spec:
+  rules:
+    # This is the host that the ingress will listen on
+    - host: idp.example.org # Change this to the domain in your cluster
+      # Here we specify what kind of ingresses we want to allow. In this case, we want to allow HTTP traffic.
+      # Another type is 'TLS', or better known as 'HTTPS'. This is not covered in this example.
+      http:
+        # An ingress can have multiple paths. Most of the time, you'll only have one path, but this can be
+        # used to route different paths to different services. For example, /api/ could be routed to a different
+        # service/pod than /.
+        paths:
+          # We register the path /; this means all traffic to idp.example.org will be routed using this path.
+          - path: /
+            # The path-type is used to determine how the path should be matched. In this case, we want to match
+            # all paths that start with the specified path. This is the most common path-type.
+            # Another type is 'Exact', which will only match the exact path. (e.g. /secret/x/ would only match /secret/x/, not /secret/x/y)
+            pathType: Prefix
+            # Here we define the backend service that will handle the traffic.
+            backend:
+              service:
+                # This corresponds to the name of the service that will handle the traffic. See service.yaml for more information.
+                name: idp-service
+                # As a service can have multiple ports, we need to specify which port the service should use.
+                # In service.yaml, we defined a port called 'http', so we specify that here.
+                port:
+                  name: http

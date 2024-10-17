@@ -1,0 +1,36 @@
+# This is a service definition for the Django IDP service.
+# A service provides a stable endpoint for other services to connect to.
+# An endpoint consists of an IP address with a corresponding (cluster-internal) DNS entry.
+# It will automatically map incoming traffic to the correct pod. (If they are available)
+# This is needed because pods are ephemeral; they can be created and destroyed at any time. So, we need something
+# to refer to uncoupled from the pod itself. In this example, we only need it for the ingress. However,
+# if you have multiple pods that need to communicate with each other, a service will also be needed to play middle-man.
+# (For example, a Django application that needs to communicate with a Postgres database pod. To do this, the django pod
+# will be configured to connect to the psql service, which will then route the traffic to the psql pod.)
+apiVersion: v1
+kind: Service
+metadata:
+  # Labels can be used to select objects and to find collections of objects that satisfy certain conditions
+  # In this case, we are using labels to identify the service as part of the django-idp application
+  labels:
+    app.kubernetes.io/instance: django-idp
+    app.kubernetes.io/name: django-idp
+  name: idp-service
+spec:
+  # We need to specify which ports the service will listen on
+  ports:
+    # We name our port 'http'. This is can be anything, but this makes it clear this port expects http traffic.
+    - name: http
+      # The port the service will listen on; in this example it's 7000 as it's also the port the Django IDP application listens on.
+      # However, if there is a port conflict, you can change this to any other port.
+      port: 7000
+      # The protocol the service will listen on; this can be 'TCP' or 'UDP'. (Most of the time, you'll use 'TCP')
+      protocol: TCP
+      # The target port is the port the service will route traffic to.
+      targetPort: 7000
+  # The selector is used to select the pods that this service will route traffic to.
+  selector:
+    # We select on the name given to the pods in the deployment.yaml file.
+    app.kubernetes.io/name: django-idp
+  # Ignore this for now; it needs to be here but we're not diving that deep into kubernetes networking...
+  type: ClusterIP
